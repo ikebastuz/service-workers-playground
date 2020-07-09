@@ -1,0 +1,1 @@
+web-push send-notification --endpoint="URL_HERE" --key="KEY_HERE" --auth="AUTH_HERE" --vapid-pubkey="VAPID_PUB_HERE" --vapid-pvtkey="VAPID_PVT_HERE" --vapid-subject="mailto:test@gmail.com" --payload='{"title":"Hello from push notification","body":"Custom body here"}'

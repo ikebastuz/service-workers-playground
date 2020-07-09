@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Service Worker</title>
+    <style>
+      #online {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background-color: green;
+      }
+    </style>
+  </head>
+  <body>
+    Online:
+    <div id="online"></div>
+    <br />
+    <img src="./cached.png" alt="" width="418px" />
+    <img src="./fetched.png" alt="" width="418px" /><br />
+    <button onClick="updateSW()">UPDATE SWs</button>
+  </body>
+  <script src="./sw.js"></script>
+  <script>
+    function updateSW() {
+      navigator.serviceWorker.getRegistrations().then((registrationsArray) => {
+        Promise.all(
+          registrationsArray.map((registration) => registration.unregister())
+        ).then(() => {
+          window.location.reload(true);
+        });
+      });
+    }
+
+    function registerSW() {
+      navigator.serviceWorker.register('./sw.js').then(
+        (registration) => {
+          // Успешная регистрация
+          console.log('ServiceWorker registration successful');
+        },
+        (err) => {
+          // При регистрации произошла ошибка
+          console.log('ServiceWorker registration failed: ', err);
+        }
+      );
+    }
+
+    const online = document.getElementById('online');
+    online.style.backgroundColor = window.navigator.onLine ? 'green' : 'red';
+    window.addEventListener('online', () => {
+      online.style.backgroundColor = 'green';
+    });
+    window.addEventListener(
+      'offline',
+      () => (online.style.backgroundColor = 'red')
+    );
+
+    if ('serviceWorker' in navigator)
+      window.addEventListener('load', registerSW);
+  </script>
+</html>

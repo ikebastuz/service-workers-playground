@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web worker</title>
+  </head>
+  <link rel="stylesheet" href="./styles.css" />
+  <body>
+    <div class="circleContainer">
+      <div class="circle" id="circle"></div>
+    </div>
+    <div class="calcFib">
+      <div class="row">
+        <button id="fib" onClick="heavyCalc(false)">Fib</button>
+        <span class="result" id="fibResult"></span>
+      </div>
+      <div class="row">
+        <button id="fibSW" onClick="heavyCalc(true)">FibWorker</button>
+        <span class="result" id="fibSWResult"></span>
+      </div>
+      <div class="row">
+        <button id="sort" onClick="heavySort(false)">Sort</button>
+        <span class="result" id="sortResult"></span>
+      </div>
+      <div class="row">
+        <button id="sortSW" onClick="heavySort(true)">SortWorker</button>
+        <span class="result" id="sortSWResult"></span>
+      </div>
+    </div>
+  </body>
+  <script src="./bouncingCircle.js"></script>
+  <script src="./lib.js"></script>
+  <script>
+    const worker = new Worker('./worker.js');
+
+    const heavyCalc = (async) => {
+      circle.style.backgroundColor = 'green';
+
+      switch (async) {
+        case false:
+          const result = fib(40);
+          circle.style.backgroundColor = 'white';
+          fibResult.innerHTML = result;
+          break;
+        case true:
+          worker.postMessage({ cmd: 'fib', data: 40 });
+          break;
+      }
+    };
+
+    const heavySort = (async) => {
+      circle.style.backgroundColor = 'green';
+
+      switch (async) {
+        case false:
+          const result = bubbleSort();
+          circle.style.backgroundColor = 'white';
+          sortResult.innerHTML = result + 'ms';
+          break;
+        case true:
+          worker.postMessage({ cmd: 'bubble' });
+          break;
+      }
+    };
+
+    window.onload = () => {
+      runCircle();
+
+      worker.addEventListener(
+        'message',
+        (e) => {
+          circle.style.backgroundColor = 'white';
+          const { cmd, result } = e.data;
+          switch (cmd) {
+            case 'fib':
+              fibSWResult.innerHTML = result;
+              break;
+            case 'bubble':
+              sortSWResult.innerHTML = result + 'ms';
+          }
+        },
+        false
+      );
+    };
+  </script>
+</html>

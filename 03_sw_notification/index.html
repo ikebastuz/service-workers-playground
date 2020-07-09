@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Service Worker</title>
+    <style>
+      #online {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background-color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <p id="allowed"></p>
+    <button onClick="displayNotification()">PUSH</button>
+  </body>
+  <script src="./sw.js"></script>
+  <script>
+    function displayNotification() {
+      if (Notification.permission == 'granted') {
+        navigator.serviceWorker.getRegistration().then(function (reg) {
+          var options = {
+            body: 'Here is a notification body!',
+            icon: 'images/emoji.jpg',
+            vibrate: [100, 50, 100],
+            data: {
+              dateOfArrival: Date.now(),
+              primaryKey: 1,
+            },
+            actions: [
+              {
+                action: 'explore',
+                title: 'Explore this new world',
+              },
+              {
+                action: 'close',
+                title: 'Close notification',
+              },
+            ],
+          };
+          reg.showNotification('Hello world!', options);
+        });
+      }
+    }
+
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      console.log('Service Worker and Push is supported');
+
+      Notification.requestPermission((status) => {
+        document.getElementById(
+          'allowed'
+        ).innerHTML = `Notification permission status: ${status}`;
+      });
+
+      navigator.serviceWorker
+        .register('sw.js')
+        .then((swReg) => {
+          console.log('Service Worker is registered', swReg);
+        })
+        .catch((error) => {
+          console.error('Service Worker Error', error);
+        });
+    } else {
+      console.log('Push messaging is not supported');
+    }
+  </script>
+</html>

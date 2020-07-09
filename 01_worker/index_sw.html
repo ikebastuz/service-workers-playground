@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web worker</title>
+  </head>
+  <link rel="stylesheet" href="./styles.css" />
+  <body>
+    <div class="circleContainer">
+      <div class="circle" id="circle"></div>
+    </div>
+    <div class="calcFib">
+      <div class="row">
+        <button id="fib" onClick="heavyCalc(false)">Fib</button>
+        <span class="result" id="fibResult"></span>
+      </div>
+      <div class="row">
+        <button id="fibSW" onClick="heavyCalc(true)">FibWorker</button>
+        <span class="result" id="fibSWResult"></span>
+      </div>
+      <div class="row">
+        <button id="sort" onClick="heavySort(false)">Sort</button>
+        <span class="result" id="sortResult"></span>
+      </div>
+      <div class="row">
+        <button id="sortSW" onClick="heavySort(true)">SortWorker</button>
+        <span class="result" id="sortSWResult"></span>
+      </div>
+    </div>
+  </body>
+  <script src="./bouncingCircle.js"></script>
+  <script>
+    const fib = (num) => {
+      let result = 0;
+      if (num < 2) return num;
+
+      result = fib(num - 1) + fib(num - 2);
+
+      return result;
+    };
+
+    const bubbleSort = () => {
+      const length = 60000;
+      const a = Array.from({ length }, (_, idx) => length - idx);
+
+      function sort(a) {
+        let swapped;
+        do {
+          swapped = false;
+          for (let i = 0; i < a.length - 1; i++) {
+            if (a[i] > a[i + 1]) {
+              const temp = a[i];
+              a[i] = a[i + 1];
+              a[i + 1] = temp;
+              swapped = true;
+            }
+          }
+        } while (swapped);
+      }
+
+      const start = new Date().getTime();
+      sort(a);
+      const end = new Date().getTime();
+      const time = end - start;
+      return time;
+    };
+
+    const heavyCalc = (async) => {
+      circle.style.backgroundColor = 'green';
+
+      switch (async) {
+        case false:
+          const result = fib(40);
+          circle.style.backgroundColor = 'white';
+          fibResult.innerHTML = result;
+          break;
+        case true:
+          const worker = navigator.serviceWorker.controller;
+          if (worker) {
+            worker.postMessage({ cmd: 'fib', data: 40 });
+          }
+          break;
+      }
+    };
+
+    const heavySort = (async) => {
+      circle.style.backgroundColor = 'green';
+
+      switch (async) {
+        case false:
+          const result = bubbleSort();
+          circle.style.backgroundColor = 'white';
+          sortResult.innerHTML = result + 'ms';
+          break;
+        case true:
+          const worker = navigator.serviceWorker.controller;
+          if (worker) {
+            worker.postMessage({ cmd: 'bubble' });
+          }
+          break;
+      }
+    };
+
+    window.onload = () => {
+      runCircle();
+
+      navigator.serviceWorker
+        .register('sw.js')
+        .then((swReg) => {
+          console.log('Service Worker is registered', swReg);
+        })
+        .catch((error) => {
+          console.error('Service Worker Error', error);
+        });
+
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        circle.style.backgroundColor = 'white';
+        const { cmd, result } = event.data;
+        switch (cmd) {
+          case 'fib':
+            fibSWResult.innerHTML = result;
+            break;
+          case 'bubble':
+            sortSWResult.innerHTML = result + 'ms';
+        }
+      });
+    };
+  </script>
+</html>

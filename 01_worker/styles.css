@@ -1,0 +1,56 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+*:focus {
+  outline: none;
+}
+body {
+  width: 100vw;
+  height: 100vh;
+  padding: 10px;
+}
+
+.calcFib {
+  display: flex;
+  flex-direction: column;
+}
+.calcFib .row {
+  display: flex;
+  height: 50px;
+}
+.calcFib .row button {
+  flex: 1;
+  border: 1px solid black;
+  cursor: pointer;
+}
+.calcFib .row button:hover {
+  flex: 1;
+  border: 1px solid black;
+  cursor: pointer;
+  background: #ccc;
+}
+.calcFib .row span {
+  flex: 2;
+  border: 1px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.circleContainer {
+  width: 100%;
+  height: 200px;
+  position: relative;
+}
+.circle {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  border: 1px solid #556677;
+  border-radius: 20px;
+}

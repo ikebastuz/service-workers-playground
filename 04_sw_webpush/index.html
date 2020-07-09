@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Service Worker</title>
+    <style>
+      #online {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background-color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <button onClick="subscribeUser()">SUBSCRIBE</button>
+  </body>
+  <script src="./sw.js"></script>
+  <script>
+    function urlB64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+      const base64 = (base64String + padding)
+        .replace(/\-/g, '+')
+        .replace(/_/g, '/');
+
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+    function subscribeUser() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(function (reg) {
+          const applicationServerKey = urlB64ToUint8Array(
+            'BGN7aJTgeoDKYV9j43lo6AD5PEaXPFwWC-OxuJBsEaY5_oCpHiGUaA2_Wfx04tETKUPB9hZejf49Q1DoCmuZXGw'
+          );
+
+          reg.pushManager
+            .subscribe({
+              userVisibleOnly: true,
+              applicationServerKey,
+            })
+            .then(function (sub) {
+              console.log(`Subscribed: ${JSON.stringify(sub)}`);
+            })
+            .catch(function (e) {
+              if (Notification.permission === 'denied') {
+                console.warn('Permission for notifications was denied');
+              } else {
+                console.error('Unable to subscribe to push', e);
+              }
+            });
+        });
+      }
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('sw.js')
+        .then(function (reg) {
+          console.log('Service Worker Registered!');
+          reg.pushManager.getSubscription().then(function (sub) {
+            if (sub === null) {
+              console.log('Not subscribed to push service!');
+            } else {
+              console.log(`Subscribed: ${JSON.stringify(sub)}`);
+            }
+          });
+        })
+        .catch(function (err) {
+          console.log('Service Worker registration failed: ', err);
+        });
+    }
+  </script>
+</html>
